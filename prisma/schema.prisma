@@ -4,8 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -13,17 +12,196 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  name        String?
-  image       String?
-  role        Role      @default(CANDIDATE)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  role          Role      @default(CANDIDATE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  profileAttributes   ProfileAttribute[]
+  projects            Project[]
+  cvs                 CV[] @relation("CandidateCVs")
 }
 
 enum Role {
   CANDIDATE
   RECRUITER
   ADMIN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum AttributeCategory {
+  CERTIFICATION
+  DOMAIN_KNOWLEDGE
+  PERSONAL_INFORMATION
+  SOFT_SKILLS
+}
+
+enum AttributeType {
+  STRING
+  TEXT
+  IMAGE
+  NUMERIC
+  DATE
+  PERIOD
+  BOOLEAN
+  ONE_OF_MANY
+}
+
+model Attribute {
+  id        String            @id @default(cuid())
+  category  AttributeCategory
+  name      String            @unique
+  type      AttributeType
+  options   String[]          @default([])
+  isBuiltIn Boolean           @default(false)   // ← add this line
+  version   Int               @default(1)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  positionAttributes PositionAttribute[]
+  accessRules        AccessRule[]
+  profileAttributes  ProfileAttribute[]          // ← add this line too
+}
+
+model Position {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  isPublic    Boolean  @default(true)
+  maxProjects Int      @default(3)
+  projectTags String[] @default([])
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  positionAttributes PositionAttribute[]
+  accessRules        AccessRule[]
+  cvs                CV[]
+}
+
+model PositionAttribute {
+  id          String @id @default(cuid())
+  positionId  String
+  attributeId String
+  order       Int    @default(0)
+
+  position  Position  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id])
+
+  @@unique([positionId, attributeId])
+}
+
+enum AccessRuleOperator {
+  EQUALS
+  GREATER_THAN
+  LESS_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
+  IS_TRUE
+  IS_FALSE
+  CONTAINS
+}
+
+model AccessRule {
+  id          String             @id @default(cuid())
+  positionId  String
+  attributeId String
+  operator    AccessRuleOperator
+  value       String             @default("")
+
+  position  Position  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id])
+}
+
+model ProfileAttribute {
+  id          String   @id @default(cuid())
+  userId      String
+  attributeId String
+  value       String   @default("")
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id])
+
+  // One value per user per attribute — enforced at the database level
+  @@unique([userId, attributeId])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  startDate   DateTime?
+  endDate     DateTime?
+  description String    @db.Text @default("")
+  tags        String[]  @default([])
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum CVStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model CV {
+  id          String   @id @default(cuid())
+  candidateId String
+  positionId  String
+  status      CVStatus @default(DRAFT)
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  candidate User     @relation("CandidateCVs", fields: [candidateId], references: [id])
+  position  Position @relation(fields: [positionId], references: [id])
+
+  // One CV per candidate per position — enforced at the database level
+  @@unique([candidateId, positionId])
 }
