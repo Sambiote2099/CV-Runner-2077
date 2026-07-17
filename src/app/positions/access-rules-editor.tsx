@@ -2,6 +2,7 @@
 
 import { AccessRuleOperator, AttributeType } from "@prisma/client"
 import type { Attribute } from "@prisma/client"
+import { useTranslations } from "next-intl"
 
 export type RuleInput = {
   attributeId: string
@@ -9,7 +10,6 @@ export type RuleInput = {
   value: string
 }
 
-// Which operators make sense for each attribute type
 function getOperatorsForType(type: AttributeType): AccessRuleOperator[] {
   switch (type) {
     case "NUMERIC":
@@ -38,6 +38,8 @@ type Props = {
 }
 
 export default function AccessRulesEditor({ rules, onChange, attributes }: Props) {
+  const t = useTranslations("Positions")
+
   function addRule() {
     onChange([
       ...rules,
@@ -53,7 +55,6 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
     const next = rules.map((rule, i) => {
       if (i !== index) return rule
       const updated = { ...rule, ...patch }
-      // When attribute changes, reset operator to first valid one for the new type
       if (patch.attributeId) {
         const attr = attributes.find((a) => a.id === patch.attributeId)
         if (attr) updated.operator = getOperatorsForType(attr.type)[0]
@@ -66,8 +67,8 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
   return (
     <div className="flex flex-col gap-3">
       {rules.length === 0 && (
-        <p className="text-sm text-gray-400">
-          No rules — position is open to all authenticated users when Public.
+        <p className="text-sm text-slate-400 dark:text-slate-500">
+          {t("noRulesHint")}
         </p>
       )}
 
@@ -76,7 +77,6 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
         const operators = attr
           ? getOperatorsForType(attr.type)
           : [AccessRuleOperator.EQUALS]
-        // IS_TRUE / IS_FALSE don't need a value — hide the input
         const hideValue =
           rule.operator === AccessRuleOperator.IS_TRUE ||
           rule.operator === AccessRuleOperator.IS_FALSE
@@ -84,14 +84,14 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
         return (
           <div
             key={index}
-            className="flex flex-wrap items-center gap-2 rounded border p-2"
+            className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 dark:border-slate-600 bg-amber-50 dark:bg-slate-700 p-2"
           >
             <select
               value={rule.attributeId}
               onChange={(e) => updateRule(index, { attributeId: e.target.value })}
-              className="rounded border px-2 py-1 text-sm"
+              className="rounded-lg border border-amber-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             >
-              <option value="">Select attribute…</option>
+              <option value="">{t("selectAttribute")}</option>
               {attributes.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
@@ -102,7 +102,7 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
               onChange={(e) =>
                 updateRule(index, { operator: e.target.value as AccessRuleOperator })
               }
-              className="rounded border px-2 py-1 text-sm"
+              className="rounded-lg border border-amber-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             >
               {operators.map((op) => (
                 <option key={op} value={op}>
@@ -116,17 +116,17 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
                 type="text"
                 value={rule.value}
                 onChange={(e) => updateRule(index, { value: e.target.value })}
-                placeholder="Value…"
-                className="rounded border px-2 py-1 text-sm"
+                placeholder={t("valuePlaceholder")}
+                className="rounded-lg border border-amber-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
               />
             )}
 
             <button
               type="button"
               onClick={() => removeRule(index)}
-              className="ml-auto text-xs text-red-500 hover:text-red-700"
+              className="ml-auto text-xs text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 transition-colors duration-200"
             >
-              Remove
+              {t("removeRule")}
             </button>
           </div>
         )
@@ -135,9 +135,9 @@ export default function AccessRulesEditor({ rules, onChange, attributes }: Props
       <button
         type="button"
         onClick={addRule}
-        className="self-start rounded border px-3 py-1 text-sm hover:bg-gray-50"
+        className="self-start rounded-lg border border-amber-200 dark:border-slate-600 px-3 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 transition-all duration-300"
       >
-        + Add rule
+        {t("addRule")}
       </button>
     </div>
   )

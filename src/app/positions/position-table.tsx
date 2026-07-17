@@ -1,9 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { deletePosition, duplicatePosition } from "./actions"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
+import { Copy, Pencil, Trash2 } from "lucide-react"
 
 type PositionRow = {
   id: string
@@ -12,130 +15,178 @@ type PositionRow = {
   version: number
   createdAt: Date
   _count: { positionAttributes: number }
+  cvs: { id: string }[]
 }
 
 export default function PositionTable({ positions }: { positions: PositionRow[] }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const t = useTranslations("Positions")
+  const tCommon = useTranslations("Common")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const selectAllRef = useRef<HTMLInputElement>(null)
 
-  const selected = positions.find((p) => p.id === selectedId)
+  const selectedPositions = positions.filter((p) => selectedIds.has(p.id))
+  const noneSelected = selectedIds.size === 0
+  const allSelected = positions.length > 0 && selectedIds.size === positions.length
+  const someSelected = selectedIds.size > 0 && !allSelected
+  const singleSelected = selectedPositions.length === 1 ? selectedPositions[0] : null
+
+  if (selectAllRef.current) {
+    selectAllRef.current.indeterminate = someSelected
+  }
+
+  function toggleRow(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function toggleAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(positions.map((p) => p.id)))
+  }
 
   async function handleDelete() {
-    if (!selected) return
-    const confirmed = window.confirm(`Delete "${selected.title}"? This cannot be undone.`)
-    if (!confirmed) return
+    const titles = selectedPositions.map((p) => p.title).join(", ")
+    if (!window.confirm(t("deleteConfirm", { title: titles }))) return
 
-    const result = await deletePosition(selected.id, selected.version)
-    if (result?.error) {
-      setError(typeof result.error === "string" ? result.error : "Something went wrong.")
-    } else {
-      setSelectedId(null)
-      router.refresh()
+    setLoading(true)
+    let errorCount = 0
+    for (const pos of selectedPositions) {
+      const result = await deletePosition(pos.id, pos.version)
+      if (result?.error) errorCount++
     }
+    if (errorCount > 0) toast.error(t("somethingWrong"))
+    else toast.success(t("deleteSuccess"))
+    setSelectedIds(new Set())
+    setLoading(false)
+    router.refresh()
   }
 
   async function handleDuplicate() {
-    if (!selected) return
-    const result = await duplicatePosition(selected.id)
-    if (result?.error) {
-      setError(result.error)
-    } else {
-      setSelectedId(null)
-      router.refresh()
-    }
+    if (!singleSelected) return
+    setLoading(true)
+    const result = await duplicatePosition(singleSelected.id)
+    if (result?.error) toast.error(result.error)
+    else toast.success(t("duplicateSuccess"))
+    setSelectedIds(new Set())
+    setLoading(false)
+    router.refresh()
   }
 
   return (
     <div>
-      <div className="mb-3 flex min-h-[40px] items-center gap-2">
-        {selected ? (
-          <>
-            <span className="text-sm text-gray-500">1 selected</span>
-            <Link
-              href={`/positions/${selected.id}/edit`}
-              className="rounded border px-3 py-1 text-sm hover:bg-gray-50"
-            >
-              Edit
-            </Link>
-            <button
-              onClick={handleDuplicate}
-              className="rounded border px-3 py-1 text-sm hover:bg-gray-50"
-            >
-              Duplicate
-            </button>
-            <button
-              onClick={handleDelete}
-              className="rounded border border-red-300 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
-            >
-              Delete
-            </button>
-          </>
-        ) : (
-          <span className="text-sm text-gray-400">Select a row to edit, duplicate, or delete</span>
-        )}
+      {/* Toolbar — always visible */}
+      <div className="mb-3 flex min-h-[40px] flex-wrap items-center gap-2">
+        <span className="text-sm text-slate-400 dark:text-slate-500 mr-1">
+          {noneSelected ? t("selectRowHint") : t("selectedCount", { count: selectedIds.size })}
+        </span>
+
+        {/* Edit — single only */}
+        <Link
+          href={singleSelected ? `/positions/${singleSelected.id}/edit` : "#"}
+          onClick={(e) => { if (!singleSelected) e.preventDefault() }}
+          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1 text-sm transition-all duration-300 ${
+            singleSelected
+              ? "border-amber-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700"
+              : "border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 cursor-not-allowed"
+          }`}
+        >
+          <Pencil size={14} />
+          {tCommon("edit")}
+        </Link>
+
+        {/* Duplicate — single only */}
+        <button
+          onClick={handleDuplicate}
+          disabled={!singleSelected || loading}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-200 dark:border-slate-600 px-3 py-1 text-sm text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Copy size={14} />
+          {tCommon("duplicate")}
+        </button>
+
+        {/* Delete — multi */}
+        <button
+          onClick={handleDelete}
+          disabled={noneSelected || loading}
+          className="flex items-center gap-1.5 rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-1 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Trash2 size={14} />
+          {tCommon("delete")}
+        </button>
       </div>
 
-      {error && (
-        <p className="mb-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-
       {positions.length === 0 ? (
-        <p className="text-gray-500">No positions yet.</p>
+        <p className="text-slate-500 dark:text-slate-400">{t("noPositions")}</p>
       ) : (
-        <table className="w-full border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b font-semibold">
-              <th className="w-8 py-2"></th>
-              <th className="py-2 pr-4">Title</th>
-              <th className="py-2 pr-4">Access</th>
-              <th className="py-2 pr-4">Attributes</th>
-              <th className="py-2">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positions.map((pos) => (
-              <tr
-                key={pos.id}
-                className={`cursor-pointer border-b ${
-                  selectedId === pos.id ? "bg-blue-50" : "hover:bg-gray-50"
-                }`}
-                onClick={() => setSelectedId(selectedId === pos.id ? null : pos.id)}
-              >
-                <td className="py-2">
+        <div className="bg-white p-2 dark:bg-slate-800 rounded-2xl border border-amber-100 dark:border-slate-700 shadow-sm overflow-x-auto sm:overflow-visible">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b-2 border-amber-100 dark:border-slate-600 font-semibold text-slate-600 dark:text-slate-300">
+                <th className="w-8 py-2 pl-4">
                   <input
+                    ref={selectAllRef}
                     type="checkbox"
-                    readOnly
-                    checked={selectedId === pos.id}
-                    className="pointer-events-none"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    className="accent-amber-500 cursor-pointer"
                   />
-                </td>
-                <td className="py-2 pr-4 font-medium">
-                  <Link href={`/positions/${pos.id}`} className="hover:underline">
-                    {pos.title}
-                  </Link>
-                </td>
-                <td className="py-2 pr-4">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      pos.isPublic
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {pos.isPublic ? "Public" : "Restricted"}
-                  </span>
-                </td>
-                <td className="py-2 pr-4">{pos._count.positionAttributes}</td>
-                <td className="py-2 text-gray-500">
-                  {pos.createdAt.toLocaleDateString()}
-                </td>
+                </th>
+                <th className="py-2 pr-4">{t("titleLabel")}</th>
+                <th className="py-2 pr-4">{tCommon("access")}</th>
+                <th className="py-2 pr-4">{t("attributes")}</th>
+                <th className="py-2">{tCommon("created")}</th>
+                <th className="py-2 pl-2 pr-4">{t("peopleApplied")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {positions.map((pos) => (
+                <tr
+                  key={pos.id}
+                  onClick={() => toggleRow(pos.id)}
+                  className={`cursor-pointer hover:scale-102 border-b border-amber-50 dark:border-slate-700 transition-all duration-300 ${
+                    selectedIds.has(pos.id)
+                      ? "bg-amber-100 dark:bg-slate-600"
+                      : "hover:bg-amber-50 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <td className="py-2 pl-4">
+                    <input
+                      type="checkbox"
+                      readOnly
+                      checked={selectedIds.has(pos.id)}
+                      className="pointer-events-none accent-amber-500"
+                    />
+                  </td>
+                  <td className="py-2 pr-4 font-medium">
+                    <Link
+                      href={`/positions/${pos.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hover:underline text-slate-800 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400"
+                    >
+                      {pos.title}
+                    </Link>
+                  </td>
+                  <td className="py-2 pr-4">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      pos.isPublic
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                        : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                    }`}>
+                      {pos.isPublic ? tCommon("public") : tCommon("restricted")}
+                    </span>
+                  </td>
+                  <td className="py-2 pl-6 pr-4 text-slate-500 dark:text-slate-400">{pos._count.positionAttributes}</td>
+                  <td className="py-2 text-slate-500 dark:text-slate-400">{pos.createdAt.toLocaleDateString()}</td>
+                  <td className="py-2 pl-6 pr-4 text-slate-500 dark:text-slate-400">{pos.cvs.length}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

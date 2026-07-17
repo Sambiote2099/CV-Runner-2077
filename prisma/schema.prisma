@@ -18,6 +18,7 @@ model User {
   name          String?
   image         String?
   role          Role      @default(CANDIDATE)
+  isBlocked     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -26,6 +27,8 @@ model User {
   profileAttributes   ProfileAttribute[]
   projects            Project[]
   cvs                 CV[] @relation("CandidateCVs")
+  discussionPosts     DiscussionPost[]
+  likes               Like[] @relation("RecruiterLikes")
 }
 
 enum Role {
@@ -118,6 +121,7 @@ model Position {
   positionAttributes PositionAttribute[]
   accessRules        AccessRule[]
   cvs                CV[]
+  discussionPosts    DiscussionPost[]
 }
 
 model PositionAttribute {
@@ -199,9 +203,33 @@ model CV {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  candidate User     @relation("CandidateCVs", fields: [candidateId], references: [id])
-  position  Position @relation(fields: [positionId], references: [id])
-
+  candidate User     @relation("CandidateCVs", fields: [candidateId], references: [id], onDelete: Cascade)
+  position  Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  likes     Like[]
   // One CV per candidate per position — enforced at the database level
   @@unique([candidateId, positionId])
+}
+
+model DiscussionPost {
+  id         String   @id @default(cuid())
+  positionId String
+  authorId   String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+
+  position Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  recruiterId String
+  cvId        String
+  createdAt   DateTime @default(now())
+
+  recruiter User @relation("RecruiterLikes", fields: [recruiterId], references: [id], onDelete: Cascade)
+  cv        CV   @relation(fields: [cvId], references: [id], onDelete: Cascade)
+
+  // One like per recruiter per CV — enforced at the database level
+  @@unique([recruiterId, cvId])
 }

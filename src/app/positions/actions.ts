@@ -31,7 +31,7 @@ await prisma.position.create({
     description,
     isPublic,
     maxProjects,
-    projectTags: projectTags.split(",").map((s) => s.trim()).filter(Boolean),
+    projectTags: projectTags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
     positionAttributes: {
       create: attributeIds.map((attributeId, index) => ({
         attributeId,
@@ -86,7 +86,8 @@ export async function duplicatePosition(id: string) {
     },
   })
 
-  redirect("/positions")
+  //redirect("/positions")
+  return { success: true }
 }
 
 export async function updatePosition(
@@ -115,7 +116,7 @@ export async function updatePosition(
         description,
         isPublic,
         maxProjects,
-        projectTags: projectTags.split(",").map((s) => s.trim()).filter(Boolean),
+        projectTags: projectTags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
         version: { increment: 1 },
       },
     })
@@ -165,5 +166,6 @@ export async function deletePosition(id: string, version: number) {
     return { error: "This position was already modified or deleted. Please reload." }
   }
 
-  redirect("/positions")
+  //redirect("/positions")
+  return { success: true }
 }

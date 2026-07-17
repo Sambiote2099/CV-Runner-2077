@@ -69,3 +69,102 @@ export async function createCV(
 
   redirect(`/cv/${cv.id}`)
 }
+
+export async function publishCV(
+  id: string,
+  version: number
+): Promise<{ error?: string }> {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const cv = await prisma.cV.findUnique({
+    where: { id },
+    include: { position: { include: { positionAttributes: true } } },
+  })
+  if (!cv) return { error: "CV not found." }
+
+  // Only the owner (or admin) can publish
+  if (cv.candidateId !== session.user.id && session.user.role !== "ADMIN") {
+    return { error: "Unauthorized." }
+  }
+
+  // Re-verify all required attributes are filled before publishing —
+  // the client already checks this, but we never trust the client alone
+  const requiredIds = cv.position.positionAttributes.map((pa) => pa.attributeId)
+  const profileAttrs = await prisma.profileAttribute.findMany({
+    where: { userId: cv.candidateId, attributeId: { in: requiredIds } },
+  })
+
+  const allFilled = requiredIds.every((attrId) => {
+    const pa = profileAttrs.find((p) => p.attributeId === attrId)
+    return pa && pa.value.trim() !== ""
+  })
+
+  if (!allFilled) {
+    return { error: "Fill in all required attributes before publishing." }
+  }
+
+  // Version-checked update — same optimistic locking pattern as everywhere else
+  const result = await prisma.cV.updateMany({
+    where: { id, version },
+    data: { status: "PUBLISHED", version: { increment: 1 } },
+  })
+
+  if (result.count === 0) {
+    return { error: "This CV was changed elsewhere. Please reload." }
+  }
+  return {}
+}
+
+export async function toggleLike(
+  cvId: string
+): Promise<{ error?: string }> {
+  const session = await auth()
+  if (!session?.user?.id) return { error: "Unauthorized" }
+  if (session.user.role !== "RECRUITER" && session.user.role !== "ADMIN") {
+    return { error: "Only recruiters can like CVs." }
+  }
+
+  const recruiterId = session.user.id
+
+  // Check if like already exists
+  const existing = await prisma.like.findUnique({
+    where: { recruiterId_cvId: { recruiterId, cvId } },
+  })
+
+  if (existing) {
+    // Unlike
+    await prisma.like.delete({ where: { id: existing.id } })
+  } else {
+    // Like
+    await prisma.like.create({ data: { recruiterId, cvId } })
+  }
+
+  return {}
+}
+
+export async function deleteCV(
+  id: string,
+  version: number
+): Promise<{ error?: string }> {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const cv = await prisma.cV.findUnique({ where: { id } })
+  if (!cv) return { error: "CV not found." }
+
+  // Only the owner or an Admin can delete
+  if (cv.candidateId !== session.user.id && session.user.role !== "ADMIN") {
+    return { error: "Unauthorized." }
+  }
+
+  const result = await prisma.cV.deleteMany({
+    where: { id, version },
+  })
+
+  if (result.count === 0) {
+    return { error: "CV was modified elsewhere. Please reload." }
+  }
+
+  return {}
+}

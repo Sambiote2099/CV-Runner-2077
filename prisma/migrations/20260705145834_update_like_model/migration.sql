@@ -1,0 +1,5 @@
+-- DropForeignKey
+ALTER TABLE "Like" DROP CONSTRAINT "Like_cvId_fkey";
+
+-- AddForeignKey
+ALTER TABLE "Like" ADD CONSTRAINT "Like_cvId_fkey" FOREIGN KEY ("cvId") REFERENCES "CV"("id") ON DELETE CASCADE ON UPDATE CASCADE;

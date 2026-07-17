@@ -1,9 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { PrismaNeon } from "@prisma/adapter-neon"
 
-const adapter = new PrismaNeon({
-  connectionString: process.env.DATABASE_URL!,
-})
+const adapter = new PrismaNeon({connectionString: process.env.DATABASE_URL!,})
 
 // Reuse one client across hot-reloads in dev, instead of creating a new
 // one (and a new DB connection) on every file save.

@@ -8,9 +8,12 @@ import { updateAttribute } from "../../actions"
 import { AttributeCategory, AttributeType } from "@prisma/client"
 import type { Attribute } from "@prisma/client"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 export default function EditAttributeForm({ attribute }: { attribute: Attribute }) {
-  const [conflictError, setConflictError] = useState<string | null>(null)
+  const t = useTranslations("Attributes")
+  const tCommon = useTranslations("Common")
 
   const {
     register,
@@ -30,73 +33,58 @@ export default function EditAttributeForm({ attribute }: { attribute: Attribute 
   const selectedType = watch("type")
 
   async function onSubmit(data: AttributeFormData) {
-    setConflictError(null)
     const result = await updateAttribute(attribute.id, attribute.version, data)
     if (result?.error) {
       const msg = "_conflict" in result.error
         ? result.error._conflict?.[0]
-        : "Validation error — please check the fields."
-      setConflictError(msg ?? "Something went wrong.")
+        : t("validationError")
+      toast.error(msg ?? t("somethingWrong"))
     }
-    // On success, updateAttribute calls redirect() on the server
-    // so this function never reaches here in the success case.
+    // On success, updateAttribute calls redirect() server-side
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-
-      {conflictError && (
-        <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {conflictError}
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="ml-2 underline"
-          >
-            Reload
-          </button>
-        </div>
-      )}
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 bg-white dark:bg-slate-800 rounded-2xl border border-amber-100 dark:border-slate-700 shadow-sm p-6">
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Name</label>
+        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("name")}</label>
         <input
           {...register("name")}
-          className="w-full rounded border px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-amber-200 dark:border-slate-600 bg-amber-50 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
         />
-        {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.name.message}</p>}
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Category</label>
-        <select {...register("category")} className="w-full rounded border px-3 py-2 text-sm">
+        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("category")}</label>
+        <select {...register("category")} className="w-full rounded-lg border border-amber-200 dark:border-slate-600 bg-amber-50 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500">
           {Object.values(AttributeCategory).map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-        {errors.category && <p className="mt-1 text-xs text-red-600">{errors.category.message}</p>}
+        {errors.category && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.category.message}</p>}
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Type</label>
-        <select {...register("type")} className="w-full rounded border px-3 py-2 text-sm">
-          {Object.values(AttributeType).map((t) => (
-            <option key={t} value={t}>{t}</option>
+        <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t("type")}</label>
+        <select {...register("type")} className="w-full rounded-lg border border-amber-200 dark:border-slate-600 bg-amber-50 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500">
+          {Object.values(AttributeType).map((tp) => (
+            <option key={tp} value={tp}>{tp}</option>
           ))}
         </select>
-        {errors.type && <p className="mt-1 text-xs text-red-600">{errors.type.message}</p>}
+        {errors.type && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.type.message}</p>}
       </div>
 
       {selectedType === "ONE_OF_MANY" && (
         <div>
-          <label className="mb-1 block text-sm font-medium">
-            Options <span className="text-gray-400">(comma-separated)</span>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            {t("options")} <span className="text-slate-400 dark:text-slate-500">{t("commaSeparated")}</span>
           </label>
           <input
             {...register("options")}
-            className="w-full rounded border px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-amber-200 dark:border-slate-600 bg-amber-50 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
           />
-          {errors.options && <p className="mt-1 text-xs text-red-600">{errors.options.message}</p>}
+          {errors.options && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.options.message}</p>}
         </div>
       )}
 
@@ -104,12 +92,12 @@ export default function EditAttributeForm({ attribute }: { attribute: Attribute 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+          className="rounded-2xl bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-slate-900 px-4 py-2 text-sm text-white font-semibold transition-all duration-300 disabled:opacity-50"
         >
-          {isSubmitting ? "Saving…" : "Save Changes"}
+          {isSubmitting ? tCommon("saving") : t("saveChanges")}
         </button>
-        <Link href="/attributes" className="rounded border px-4 py-2 text-sm">
-          Cancel
+        <Link href="/attributes" className="rounded-2xl border border-amber-200 dark:border-slate-600 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 transition-all duration-300">
+          {tCommon("cancel")}
         </Link>
       </div>
 
