@@ -8,12 +8,28 @@ export function evaluateAccessRules(
   rules: AccessRule[],
   profileAttributes: ProfileAttribute[]
 ): boolean {
-  // Build a map so each rule lookup is O(1) instead of a nested loop
+  // If there are no rules, access is granted
+  if (rules.length === 0) return true
+
   const valueMap = new Map(profileAttributes.map((pa) => [pa.attributeId, pa.value]))
 
-  // Every rule must pass — one failure means no access
   return rules.every((rule) => {
-    const value = valueMap.get(rule.attributeId) ?? ""
+    const value = valueMap.get(rule.attributeId)
+
+    // If the candidate doesn't have this attribute at all, deny access.
+    // An attribute that exists but is empty is also treated as not meeting
+    // the rule — except for IS_TRUE/IS_FALSE which are boolean checks.
+    if (value === undefined) return false
+
+    // For non-boolean operators, an empty value never satisfies a rule
+    if (
+      value.trim() === "" &&
+      rule.operator !== "IS_TRUE" &&
+      rule.operator !== "IS_FALSE"
+    ) {
+      return false
+    }
+
     return evaluateSingleRule(rule.operator, value, rule.value)
   })
 }
@@ -27,7 +43,7 @@ function evaluateSingleRule(
     case AccessRuleOperator.IS_TRUE:
       return candidateValue === "true"
     case AccessRuleOperator.IS_FALSE:
-      return candidateValue !== "true"
+      return candidateValue === "false"
     case AccessRuleOperator.EQUALS:
       return candidateValue === ruleValue
     case AccessRuleOperator.CONTAINS:
