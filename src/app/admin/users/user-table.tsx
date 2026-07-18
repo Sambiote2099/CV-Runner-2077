@@ -1,14 +1,26 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { blockUser, unblockUser, deleteUser, setUserRole } from "./actions"
-import { Role } from "@prisma/client"
-import type { User } from "@prisma/client"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Lock, LockOpen, Trash2 } from "lucide-react"
+
+type Role = "CANDIDATE" | "RECRUITER" | "ADMIN"
+
+type User = {
+  id: string
+  name: string | null
+  email: string
+  role: Role
+  isBlocked: boolean
+  createdAt: Date
+  updatedAt: Date
+  emailVerified: Date | null
+  image: string | null
+}
 
 export default function UserTable({
   users,
@@ -40,9 +52,11 @@ export default function UserTable({
   const singleSelected = selectedUsers.length === 1 ? selectedUsers[0] : null
 
   // Keep select-all checkbox indeterminate in sync
-  if (selectAllRef.current) {
-    selectAllRef.current.indeterminate = someSelected
-  }
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someSelected
+    }
+  }, [someSelected])
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
