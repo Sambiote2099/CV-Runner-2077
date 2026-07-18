@@ -66,20 +66,24 @@ export default async function Header() {
           <div className="flex-1 sm:hidden" />
 
           {/* Right controls */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="hidden md:block">
-            <Suspense fallback={<div className="h-8 animate-pulse rounded bg-amber-100 dark:bg-slate-700 w-full" />}>
-              <SearchBar
-                placeholder={
-                  role === "RECRUITER" || role === "ADMIN"
-                    ? t("searchRecruiter")
-                    : t("searchCandidate")
-                }
-              />
-            </Suspense>
-          </div>
-            <LangToggle />
-            <ThemeToggle />
+<div className="flex items-center gap-2 flex-shrink-0">
+  <div className="hidden md:block">
+    <Suspense fallback={<div className="h-8 animate-pulse rounded bg-amber-100 dark:bg-slate-700 w-full" />}>
+      <SearchBar
+        placeholder={
+          role === "RECRUITER" || role === "ADMIN"
+            ? t("searchRecruiter")
+            : t("searchCandidate")
+        }
+      />
+    </Suspense>
+  </div>
+
+  {/* Hide toggles on mobile — they move into the hamburger menu */}
+  <div className="hidden sm:flex items-center gap-2">
+    <LangToggle />
+    <ThemeToggle />
+  </div>
 
             {/* Desktop: avatar + name + sign out */}
             {session?.user ? (

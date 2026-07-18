@@ -3,6 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import LangToggle from "./lang-toggle"
+import ThemeToggle from "./theme-toggle"
 
 type Props = {
   role: string | undefined
@@ -70,6 +72,10 @@ export default function MobileMenu({
                 </div>
               </div>
             )}
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-amber-100 dark:border-slate-700 mb-1">
+              <LangToggle />
+              <ThemeToggle />
+            </div>
 
             {/* Nav links */}
             <Link href="/positions" onClick={() => setOpen(false)} className="text-sm font-semibold text-slate-700 dark:text-slate-300 px-3 py-2 rounded-lg hover:bg-amber-100 dark:hover:bg-slate-800 transition-colors duration-200">
