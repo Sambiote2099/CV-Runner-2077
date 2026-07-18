@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 
-const AccessRuleOperator = {
+export const AccessRuleOperator = {
   EQUALS: "EQUALS",
   GREATER_THAN: "GREATER_THAN",
   LESS_THAN: "LESS_THAN",
@@ -12,7 +12,7 @@ const AccessRuleOperator = {
   IS_FALSE: "IS_FALSE",
   CONTAINS: "CONTAINS",
 } as const
-type AccessRuleOperator = typeof AccessRuleOperator[keyof typeof AccessRuleOperator]
+export type AccessRuleOperator = typeof AccessRuleOperator[keyof typeof AccessRuleOperator]
 
 const AttributeType = {
   STRING: "STRING",
@@ -24,9 +24,9 @@ const AttributeType = {
   BOOLEAN: "BOOLEAN",
   ONE_OF_MANY: "ONE_OF_MANY",
 } as const
-type AttributeType = typeof AttributeType[keyof typeof AttributeType]
+export type AttributeType = typeof AttributeType[keyof typeof AttributeType]
 
-type Attribute = {
+export type Attribute = {
   id: string
   name: string
   category: string

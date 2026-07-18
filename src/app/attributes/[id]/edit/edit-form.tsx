@@ -1,15 +1,45 @@
 "use client"
 
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { attributeFormSchema, type AttributeFormData } from "@/lib/schemas/attribute"
 import { updateAttribute } from "../../actions"
-import { AttributeCategory, AttributeType } from "@prisma/client"
-import type { Attribute } from "@prisma/client"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+
+const AttributeCategory = {
+  CERTIFICATION: "CERTIFICATION",
+  DOMAIN_KNOWLEDGE: "DOMAIN_KNOWLEDGE",
+  PERSONAL_INFORMATION: "PERSONAL_INFORMATION",
+  SOFT_SKILLS: "SOFT_SKILLS",
+} as const
+
+const AttributeType = {
+  STRING: "STRING",
+  TEXT: "TEXT",
+  IMAGE: "IMAGE",
+  NUMERIC: "NUMERIC",
+  DATE: "DATE",
+  PERIOD: "PERIOD",
+  BOOLEAN: "BOOLEAN",
+  ONE_OF_MANY: "ONE_OF_MANY",
+} as const
+
+type AttributeCategory = typeof AttributeCategory[keyof typeof AttributeCategory]
+type AttributeType = typeof AttributeType[keyof typeof AttributeType]
+
+type Attribute = {
+  id: string
+  name: string
+  category: AttributeCategory   // ← was string
+  type: AttributeType           // ← was string
+  options: string[]
+  isBuiltIn: boolean
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 export default function EditAttributeForm({ attribute }: { attribute: Attribute }) {
   const t = useTranslations("Attributes")

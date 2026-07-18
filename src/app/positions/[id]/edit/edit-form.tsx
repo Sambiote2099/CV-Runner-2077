@@ -6,11 +6,38 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { positionFormSchema, type PositionFormData } from "@/lib/schemas/position"
 import { updatePosition } from "../../actions"
 import Link from "next/link"
-import AccessRulesEditor, { type RuleInput } from "../../access-rules-editor"
-import type { Attribute, Position, PositionAttribute, AccessRule } from "@prisma/client"
+import AccessRulesEditor, { type RuleInput, type AccessRuleOperator} from "../../access-rules-editor"
+import type { Attribute } from "@/app/positions/access-rules-editor"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+
+type Position = {
+  id: string
+  title: string
+  description: string
+  isPublic: boolean
+  maxProjects: number
+  projectTags: string[]
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+type PositionAttribute = {
+  id: string
+  positionId: string
+  attributeId: string
+  order: number
+}
+
+type AccessRule = {
+  id: string
+  positionId: string
+  attributeId: string
+  operator: AccessRuleOperator
+  value: string
+}
 
 type Props = {
   position: Position & {
@@ -182,7 +209,7 @@ export default function EditPositionForm({ position, attributes }: Props) {
         <AccessRulesEditor
           rules={rules}
           onChange={setRules}
-          attributes={attributes}
+          attributes={attributes as Attribute[]}
         />
       </div>
 
