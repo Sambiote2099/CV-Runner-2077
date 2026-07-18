@@ -4,10 +4,27 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { attributeFormSchema, type AttributeFormData } from "@/lib/schemas/attribute"
 import { createAttribute } from "../actions"
-import { AttributeCategory, AttributeType } from "@prisma/client"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+
+const AttributeCategory = {
+  CERTIFICATION: "CERTIFICATION",
+  DOMAIN_KNOWLEDGE: "DOMAIN_KNOWLEDGE",
+  PERSONAL_INFORMATION: "PERSONAL_INFORMATION",
+  SOFT_SKILLS: "SOFT_SKILLS",
+} as const
+
+const AttributeType = {
+  STRING: "STRING",
+  TEXT: "TEXT",
+  IMAGE: "IMAGE",
+  NUMERIC: "NUMERIC",
+  DATE: "DATE",
+  PERIOD: "PERIOD",
+  BOOLEAN: "BOOLEAN",
+  ONE_OF_MANY: "ONE_OF_MANY",
+} as const
 
 export default function NewAttributePage() {
   const t = useTranslations("Attributes")

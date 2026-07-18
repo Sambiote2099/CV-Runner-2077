@@ -2,10 +2,32 @@
 
 import { useRef, useState } from "react"
 import { saveProfileAttribute } from "./actions"
-import type { Attribute, ProfileAttribute } from "@prisma/client"
 import ImageUpload from "@/components/image-upload"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+
+type Attribute = {
+  id: string
+  name: string
+  type: string
+  options: string[]
+  category: string
+  isBuiltIn: boolean
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+type ProfileAttribute = {
+  id: string
+  userId: string
+  attributeId: string
+  value: string
+  version: number
+  createdAt: Date
+  updatedAt: Date
+  attribute: Attribute
+}
 
 type ProfileAttrWithAttribute = ProfileAttribute & { attribute: Attribute }
 

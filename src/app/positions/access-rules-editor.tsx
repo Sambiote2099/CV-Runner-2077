@@ -1,8 +1,42 @@
 "use client"
 
-import { AccessRuleOperator, AttributeType } from "@prisma/client"
-import type { Attribute } from "@prisma/client"
 import { useTranslations } from "next-intl"
+
+const AccessRuleOperator = {
+  EQUALS: "EQUALS",
+  GREATER_THAN: "GREATER_THAN",
+  LESS_THAN: "LESS_THAN",
+  GREATER_THAN_OR_EQUAL: "GREATER_THAN_OR_EQUAL",
+  LESS_THAN_OR_EQUAL: "LESS_THAN_OR_EQUAL",
+  IS_TRUE: "IS_TRUE",
+  IS_FALSE: "IS_FALSE",
+  CONTAINS: "CONTAINS",
+} as const
+type AccessRuleOperator = typeof AccessRuleOperator[keyof typeof AccessRuleOperator]
+
+const AttributeType = {
+  STRING: "STRING",
+  TEXT: "TEXT",
+  IMAGE: "IMAGE",
+  NUMERIC: "NUMERIC",
+  DATE: "DATE",
+  PERIOD: "PERIOD",
+  BOOLEAN: "BOOLEAN",
+  ONE_OF_MANY: "ONE_OF_MANY",
+} as const
+type AttributeType = typeof AttributeType[keyof typeof AttributeType]
+
+type Attribute = {
+  id: string
+  name: string
+  category: string
+  type: AttributeType
+  options: string[]
+  isBuiltIn: boolean
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 export type RuleInput = {
   attributeId: string

@@ -1,13 +1,24 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { deleteAttribute } from "./actions"
-import type { Attribute } from "@prisma/client"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Trash2, Pencil } from "lucide-react"
+
+type Attribute = {
+  id: string
+  name: string
+  category: string
+  type: string
+  options: string[]
+  isBuiltIn: boolean
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 export default function AttributeTable({ attributes }: { attributes: Attribute[] }) {
   const t = useTranslations("Attributes")
@@ -23,9 +34,11 @@ export default function AttributeTable({ attributes }: { attributes: Attribute[]
   const someSelected = selectedIds.size > 0 && !allSelected
   const singleSelected = selectedAttrs.length === 1 ? selectedAttrs[0] : null
 
-  if (selectAllRef.current) {
-    selectAllRef.current.indeterminate = someSelected
-  }
+  useEffect(() => {
+      if (selectAllRef.current) {
+        selectAllRef.current.indeterminate = someSelected
+      }
+    }, [someSelected])
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {

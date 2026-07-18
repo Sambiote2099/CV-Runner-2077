@@ -1,8 +1,15 @@
 "use client"
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
-import { AttributeCategory } from "@prisma/client"
 import { useTranslations } from "next-intl"
+
+const AttributeCategory = {
+  CERTIFICATION: "CERTIFICATION",
+  DOMAIN_KNOWLEDGE: "DOMAIN_KNOWLEDGE",
+  PERSONAL_INFORMATION: "PERSONAL_INFORMATION",
+  SOFT_SKILLS: "SOFT_SKILLS",
+} as const
+type AttributeCategory = typeof AttributeCategory[keyof typeof AttributeCategory]
 
 export default function AttributeSearch() {
   const t = useTranslations("Attributes")

@@ -6,9 +6,21 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { ReactTags } from "react-tag-autocomplete"
 import { createProject, updateProject, deleteProject } from "./actions"
-import type { Project } from "@prisma/client"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+
+type Project = {
+  id: string
+  userId: string
+  name: string
+  startDate: Date | null
+  endDate: Date | null
+  description: string
+  tags: string[]
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 type Tag = { value: string; label: string }
 

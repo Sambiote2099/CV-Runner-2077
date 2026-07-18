@@ -1,13 +1,35 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { deleteCV } from "@/app/cv/actions"
-import type { CV, Position } from "@prisma/client"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Trash2 } from "lucide-react"
+
+type Position = {
+  id: string
+  title: string
+  description: string
+  isPublic: boolean
+  maxProjects: number
+  projectTags: string[]
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+type CV = {
+  id: string
+  candidateId: string
+  positionId: string
+  status: string
+  version: number
+  createdAt: Date
+  updatedAt: Date
+  position: Position
+}
 
 type CVWithAccess = CV & {
   position: Position
@@ -28,9 +50,11 @@ export default function CVsTab({ cvs }: { cvs: CVWithAccess[] }) {
   const someSelected = selectedIds.size > 0 && !allSelected
   const singleSelected = selectedCVs.length === 1 ? selectedCVs[0] : null
 
-  if (selectAllRef.current) {
-    selectAllRef.current.indeterminate = someSelected
-  }
+  useEffect(() => {
+      if (selectAllRef.current) {
+        selectAllRef.current.indeterminate = someSelected
+      }
+    }, [someSelected])
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {

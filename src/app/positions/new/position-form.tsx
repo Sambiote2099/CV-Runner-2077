@@ -5,11 +5,34 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { positionFormSchema, type PositionFormData } from "@/lib/schemas/position"
 import { createPosition } from "../actions"
-import type { Attribute } from "@prisma/client"
 import Link from "next/link"
 import AccessRulesEditor, { type RuleInput } from "../access-rules-editor"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+
+const AttributeType = {
+  STRING: "STRING",
+  TEXT: "TEXT",
+  IMAGE: "IMAGE",
+  NUMERIC: "NUMERIC",
+  DATE: "DATE",
+  PERIOD: "PERIOD",
+  BOOLEAN: "BOOLEAN",
+  ONE_OF_MANY: "ONE_OF_MANY",
+} as const
+type AttributeType = typeof AttributeType[keyof typeof AttributeType]
+
+type Attribute = {
+  id: string
+  name: string
+  category: string
+  type: AttributeType  // ← string → AttributeType
+  options: string[]
+  isBuiltIn: boolean
+  version: number
+  createdAt: Date
+  updatedAt: Date
+}
 
 export default function PositionForm({ attributes }: { attributes: Attribute[] }) {
   const t = useTranslations("Positions")
