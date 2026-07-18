@@ -3,24 +3,12 @@
 import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { blockUser, unblockUser, deleteUser, setUserRole } from "./actions"
+import { Role } from "@prisma/client"
+import type { User } from "@prisma/client"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Lock, LockOpen, Trash2 } from "lucide-react"
-
-type Role = "CANDIDATE" | "RECRUITER" | "ADMIN"
-
-type User = {
-  id: string
-  name: string | null
-  email: string
-  role: Role
-  isBlocked: boolean
-  createdAt: Date
-  updatedAt: Date
-  emailVerified: Date | null
-  image: string | null
-}
 
 export default function UserTable({
   users,
@@ -132,12 +120,12 @@ export default function UserTable({
           className="rounded-lg border border-amber-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity duration-200"
         >
           {singleSelected ? (
-  (["CANDIDATE", "RECRUITER", "ADMIN"] as Role[]).map((r) => (
-    <option key={r} value={r}>{r}</option>
-  ))
-) : (
-  <option value="">— role —</option>
-)}
+            Object.values(Role).map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))
+          ) : (
+            <option value="">— role —</option>
+          )}
         </select>
 
         {showUnblock ? (
