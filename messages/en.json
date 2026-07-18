@@ -261,7 +261,8 @@
     "noPositions": "No positions found for this tag.",
     "candidate": "Candidate",
     "likes": "Likes",
-    "cvsMatching": "CVs matching \"{q}\""
+    "cvsMatching": "CVs matching \"{q}\"",
+    "cv":"CVs"
   },
   "Discussion": {
     "noPosts": "No posts yet. Be the first to start the discussion.",
