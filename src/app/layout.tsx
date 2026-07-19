@@ -10,6 +10,7 @@ import SmoothScroll from "@/components/SmoothScroll"
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner"
+import ClickSpark from "@/components/ClickSpark";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -36,11 +37,13 @@ export default async function RootLayout({
       <body className="min-h-screen">
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialTheme={theme}>
+            <ClickSpark sparkSize={10} sparkRadius={15} sparkCount={8} duration={400}>
             <Header />
             <SmoothScroll>
             <main className="pt-24 sm:pt-16">{children}</main>
             <Footer/>
             </SmoothScroll>
+            </ClickSpark>
             <Toaster richColors position="top-right" />
           </ThemeProvider>
         </NextIntlClientProvider>
