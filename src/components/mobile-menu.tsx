@@ -52,11 +52,11 @@ export default function MobileMenu({
           <div className="fixed inset-0 top-24 z-40" onClick={() => setOpen(false)} />
 
           {/* Dropdown — sits below the search bar (top-24 = 64px header + ~44px search) */}
-          <div className="fixed top-24 left-0 w-full bg-amber-50 dark:bg-slate-900 border-b border-amber-200 dark:border-slate-700 shadow-lg flex flex-col px-4 py-3 gap-1 z-50">
+          <div className="fixed top-16 left-0 w-full bg-amber-50 dark:bg-slate-900 border-b border-amber-200 dark:border-slate-700 shadow-lg flex flex-col px-4 py-3 gap-1 z-50">
 
             {/* User info */}
             {isLoggedIn && (
-              <div className="flex items-center gap-3 px-3 py-2 mb-1 border-b border-amber-100 dark:border-slate-700 pb-3">
+              <div className="flex items-center gap-3 px-3 mb-1 border-b border-amber-100 dark:border-slate-700 pb-3">
                 <Image
                   src={userImage ?? "/default-avatar.png"}
                   alt="profile pic"
