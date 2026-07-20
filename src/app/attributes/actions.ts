@@ -30,13 +30,14 @@ export async function createAttribute(data: AttributeFormData) {
     return { error: parsed.error.flatten().fieldErrors }
   }
 
-  const { name, category, type, options } = parsed.data
+  const { name, category, type, options, description } = parsed.data
 
   const created = await prisma.attribute.create({
   data: {
     name,
     category,
     type,
+    description,
     options: type === "ONE_OF_MANY"
       ? options.split(",").map((s) => s.trim()).filter(Boolean)
       : [],
@@ -62,7 +63,7 @@ export async function updateAttribute(
     return { error: parsed.error.flatten().fieldErrors }
   }
 
-  const { name, category, type, options } = parsed.data
+  const { name, category, type, options, description } = parsed.data
 
   // updateMany lets us include version in the WHERE clause.
   // If the version in the database no longer matches, count will be 0
@@ -73,6 +74,7 @@ export async function updateAttribute(
       name,
       category,
       type,
+      description,
       options: type === "ONE_OF_MANY"
         ? options.split(",").map((s) => s.trim()).filter(Boolean)
         : [],

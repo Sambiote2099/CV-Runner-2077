@@ -14,6 +14,7 @@ type Attribute = {
   category: string
   type: string
   options: string[]
+  description: string
   isBuiltIn: boolean
   version: number
   createdAt: Date
@@ -144,7 +145,14 @@ export default function AttributeTable({ attributes }: { attributes: Attribute[]
                       className="pointer-events-none accent-amber-500"
                     />
                   </td>
-                  <td className="py-2 text-slate-800 dark:text-slate-200">{attr.name}</td>
+                  <td className="py-2">
+                    <p>{attr.name}</p>
+                    {selectedIds.has(attr.id) && attr.description && (
+                      <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">
+                        {attr.description}
+                      </p>
+                    )}
+                  </td>
                   <td className="py-2 pl-2 text-slate-600 dark:text-slate-400">{attr.category}</td>
                   <td className="py-2 pl-2 text-slate-600 dark:text-slate-400">{attr.type}</td>
                 </tr>

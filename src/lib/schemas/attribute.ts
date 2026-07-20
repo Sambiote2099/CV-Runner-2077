@@ -26,6 +26,7 @@ export const attributeFormSchema = z.object({
   category: z.enum(attributeCategories),
   type: z.enum(attributeTypes),
   options: z.string(),
+  description: z.string(),
 }).refine(
   (data) => data.type !== "ONE_OF_MANY" || data.options.trim().length > 0,
   { message: "At least one option is required for dropdown type", path: ["options"] }

@@ -97,6 +97,7 @@ model Attribute {
   name      String            @unique
   type      AttributeType
   options   String[]          @default([])
+  description String            @default("")
   isBuiltIn Boolean           @default(false)   // ← add this line
   version   Int               @default(1)
   createdAt DateTime          @default(now())

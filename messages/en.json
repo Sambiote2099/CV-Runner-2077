@@ -209,7 +209,9 @@
     "oneSelected": "1 selected",
     "noAttributes": "No attributes yet.",
     "searchByName": "Search by name…",
-    "allCategories": "All categories"
+    "allCategories": "All categories",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe this attribute…"
   },
   "SignIn": {
     "title": "Sign in",
