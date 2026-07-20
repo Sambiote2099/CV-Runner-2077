@@ -131,7 +131,7 @@ export default async function Header() {
       </header>
 
       {/* Mobile search bar — fixed below header */}
-      <div className="sm:hidden fixed top-16 left-0 w-full z-10 px-2 py-2">
+      <div className="sm:hidden fixed top-16 left-0 w-full z-20 px-2 py-2">
         <Suspense fallback={<div className="h-8 animate-pulse rounded bg-amber-100 dark:bg-slate-700 w-full" />}>
           <SearchBar
             placeholder={
