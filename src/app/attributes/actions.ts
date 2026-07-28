@@ -104,10 +104,10 @@ export async function deleteAttribute(id: string, version: number) {
   const result = await prisma.attribute.deleteMany({
     where: { id, version },
   })
+  console.log("delete result", result)
 
   if (result.count === 0) {
     return { error: "This attribute was already modified or deleted. Please reload." }
   }
 
-  redirect("/attributes")
 }

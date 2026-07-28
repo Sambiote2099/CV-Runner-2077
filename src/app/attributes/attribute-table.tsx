@@ -61,6 +61,7 @@ export default function AttributeTable({ attributes }: { attributes: Attribute[]
     let errorCount = 0
     for (const attr of selectedAttrs) {
       const result = await deleteAttribute(attr.id, attr.version)
+      console.log("delete result", result)
       if (result?.error) errorCount++
     }
     if (errorCount > 0) {
