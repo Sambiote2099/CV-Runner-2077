@@ -12,6 +12,10 @@ type Props = {
   firstName: string
   lastName: string
   email: string
+  // Omit when this is the logged-in user's own profile. Set this when an
+  // Admin is pushing someone else's profile, so the server action fetches
+  // and sends that user's data instead of the Admin's own.
+  targetUserId?: string
 }
 
 type Result = {
@@ -19,7 +23,7 @@ type Result = {
   contactId: string
 }
 
-export default function SalesforceForm({ firstName, lastName, email }: Props) {
+export default function SalesforceForm({ firstName, lastName, email, targetUserId }: Props) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,6 +59,7 @@ export default function SalesforceForm({ firstName, lastName, email }: Props) {
     setLoading(true)
 
     const res = await pushToSalesforce({
+      targetUserId,
       phone,
       site,
       jobTitle,

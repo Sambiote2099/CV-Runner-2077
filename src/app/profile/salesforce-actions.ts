@@ -12,6 +12,7 @@ const PHONE_REGEX = /^\+?[\d\s\-()]{7,20}$/
 
 export async function pushToSalesforce(
   data: {
+    targetUserId?: string // omit when pushing your own profile
     phone: string
     site: string
     jobTitle: string
@@ -24,29 +25,46 @@ export async function pushToSalesforce(
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  // Fetch the user's built-in profile attributes (First Name, Last Name)
-  // These are the "non-removable fields" the spec mentions
+  // Defaults to the logged-in user — i.e. pushing your own profile.
+  const targetUserId = data.targetUserId ?? session.user.id
+
+  // Pushing someone else's data is Admin-only. This is enforced here, not
+  // just by hiding the button in the UI, since a server action can in
+  // principle be called directly.
+  if (targetUserId !== session.user.id && session.user.role !== "ADMIN") {
+    return { error: "You don't have permission to push this profile to Salesforce." }
+  }
+
+  // Always look up the target user's own record — never trust a
+  // client-supplied email, and never fall back to session.user's email,
+  // which would be the *logged-in* user (e.g. the Admin), not the profile
+  // actually being pushed.
+  const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } })
+  if (!targetUser) {
+    return { error: "User not found." }
+  }
+
+  // Fetch the target user's built-in profile attributes (First Name, Last Name)
   const builtInAttrs = await prisma.profileAttribute.findMany({
     where: {
-      userId: session.user.id,
+      userId: targetUserId,
       attribute: { isBuiltIn: true },
     },
     include: { attribute: true },
   })
 
-  // Build a map of attribute name → value for easy lookup
   const attrMap = new Map(
     builtInAttrs.map((pa) => [pa.attribute.name, pa.value])
   )
 
   const firstName = attrMap.get("First Name") ?? ""
   const lastName = attrMap.get("Last Name") ?? ""
-  const email = session.user.email ?? ""
+  const email = targetUser.email ?? ""
 
   // Validate the minimum required fields
   if (!firstName.trim() || !lastName.trim()) {
     return {
-      error: "Please fill in your First Name and Last Name in the Me tab before pushing to Salesforce.",
+      error: "First Name and Last Name must be filled in on the Me tab before pushing to Salesforce.",
     }
   }
   if (data.phone.trim() && !PHONE_REGEX.test(data.phone.trim())) {

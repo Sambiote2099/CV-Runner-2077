@@ -322,6 +322,7 @@ if (isRecruiter) {
           firstName={sfFirstName}
           lastName={sfLastName}
           email={profileUser.email ?? ""}
+          targetUserId={id}
         />
       </div>
 

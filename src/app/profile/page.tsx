@@ -130,6 +130,7 @@ const cvsWithAccess = cvs.map((cv) => ({
           firstName={firstName}
           lastName={lastName}
           email={session.user.email ?? ""}
+          targetUserId={userId}
         />
       </div>
 
