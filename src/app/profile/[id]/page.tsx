@@ -65,14 +65,6 @@ if (isRecruiter) {
     }),
   ])
 
-  const sfFirstName = meAttributes.find(
-    (pa) => pa.attribute.name === "First Name"
-  )?.value ?? ""
-
-  const sfLastName = meAttributes.find(
-    (pa) => pa.attribute.name === "Last Name"
-  )?.value ?? ""
-
   const tabs = [
     { key: "me", label: t("me") },
     { key: "info", label: t("info") },
@@ -97,15 +89,6 @@ if (isRecruiter) {
         <Link href="javascript:history.back()" className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200">
           {tCommon("back")}
         </Link>
-      </div>
-
-      {/* Admins can also push another user's data to Salesforce */}
-      <div className="mb-4">
-        <SalesforceForm
-          firstName={sfFirstName}
-          lastName={sfLastName}
-          email={profileUser.email ?? ""}
-        />
       </div>
 
       {/* Tab bar */}
@@ -303,6 +286,14 @@ if (isRecruiter) {
       evaluateAccessRules(cv.position.accessRules, allProfileAttrs),
   }))
 
+  const sfFirstName = meAttributes.find(
+    (pa) => pa.attribute.name === "First Name"
+  )?.value ?? ""
+
+  const sfLastName = meAttributes.find(
+    (pa) => pa.attribute.name === "Last Name"
+  )?.value ?? ""
+  
   const tabs = [
     { key: "me", label: t("me") },
     { key: "info", label: t("info") },
@@ -323,6 +314,15 @@ if (isRecruiter) {
         <Link href="/admin/users" className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200">
           {t("backToUsers")}
         </Link>
+      </div>
+
+       {/* Admins can also push another user's data to Salesforce */}
+      <div className="mb-4">
+        <SalesforceForm
+          firstName={sfFirstName}
+          lastName={sfLastName}
+          email={profileUser.email ?? ""}
+        />
       </div>
 
       <div className="mb-6 flex gap-1 border-b border-amber-100 dark:border-slate-700 overflow-x-auto whitespace-nowrap">
