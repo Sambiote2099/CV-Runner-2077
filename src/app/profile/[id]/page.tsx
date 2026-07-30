@@ -8,6 +8,7 @@ import InfoTab from "../info-tab"
 import ProjectsTab from "../projects-tab"
 import CVsTab from "../cvs-tab"
 import { getTranslations } from "next-intl/server"
+import SalesforceForm from "../salesforce-form"
 
 export default async function PublicProfilePage({
   params,
@@ -64,6 +65,14 @@ if (isRecruiter) {
     }),
   ])
 
+  const sfFirstName = meAttributes.find(
+    (pa) => pa.attribute.name === "First Name"
+  )?.value ?? ""
+
+  const sfLastName = meAttributes.find(
+    (pa) => pa.attribute.name === "Last Name"
+  )?.value ?? ""
+
   const tabs = [
     { key: "me", label: t("me") },
     { key: "info", label: t("info") },
@@ -88,6 +97,15 @@ if (isRecruiter) {
         <Link href="javascript:history.back()" className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200">
           {tCommon("back")}
         </Link>
+      </div>
+
+      {/* Admins can also push another user's data to Salesforce */}
+      <div className="mb-4">
+        <SalesforceForm
+          firstName={sfFirstName}
+          lastName={sfLastName}
+          email={profileUser.email ?? ""}
+        />
       </div>
 
       {/* Tab bar */}

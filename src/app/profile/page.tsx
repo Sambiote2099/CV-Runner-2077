@@ -8,6 +8,7 @@ import ProjectsTab from "./projects-tab"
 import { evaluateAccessRules } from "@/lib/access-rules"
 import CVsTab from "./cvs-tab"
 import { getTranslations } from "next-intl/server"
+import SalesforceForm from "./salesforce-form"
 
 export default async function ProfilePage({
   searchParams,
@@ -88,6 +89,15 @@ const cvsWithAccess = cvs.map((cv) => ({
     orderBy: [{ category: "asc" }, { name: "asc" }],
   })
 
+  // Pre-fill Salesforce form with existing profile data
+  const firstName = meAttributes.find(
+    (pa) => pa.attribute.name === "First Name"
+  )?.value ?? ""
+
+  const lastName = meAttributes.find(
+    (pa) => pa.attribute.name === "Last Name"
+  )?.value ?? ""
+
   const tabs = [
   { key: "me", label: t("me") },
   { key: "info", label: t("info") },
@@ -113,6 +123,14 @@ const cvsWithAccess = cvs.map((cv) => ({
             {t.label}
           </Link>
         ))}
+      </div>
+      {/* Salesforce CRM integration — available to all logged-in users */}
+      <div className="mb-4">
+        <SalesforceForm
+          firstName={firstName}
+          lastName={lastName}
+          email={session.user.email ?? ""}
+        />
       </div>
 
       {tab === "me" && (
