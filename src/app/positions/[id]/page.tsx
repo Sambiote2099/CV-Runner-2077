@@ -8,6 +8,7 @@ import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import ExportButton from "./export-button"
 import CVTable from "./cv-table"
+import TokenButton from "./token-button"
 
 export default async function PositionDetailPage({
   params,
@@ -39,6 +40,7 @@ export default async function PositionDetailPage({
 
   const isCandidate = session?.user?.role === "CANDIDATE"
   const isRecruiterOrAdmin = session?.user?.role === "RECRUITER" || session?.user?.role === "ADMIN"
+  const isAdmin = session?.user?.role === "ADMIN"
 
   let hasAccess = false
   let existingCV = null
@@ -229,6 +231,18 @@ const positionCVs =
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="rounded-xl border border-amber-100 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+              <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                Odoo Integration
+              </h2>
+              <TokenButton
+                positionId={id}
+                existingToken={position.apiToken ?? null}
+              />
             </div>
           )}
 

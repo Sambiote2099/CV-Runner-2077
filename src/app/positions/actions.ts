@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { positionFormSchema, type PositionFormData } from "@/lib/schemas/position"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { randomBytes } from "crypto"
 
 // Small helper so we don't repeat this check in every action
 async function requireRecruiter() {
@@ -168,4 +169,21 @@ export async function deletePosition(id: string, version: number) {
 
   //redirect("/positions")
   return { success: true }
+}
+
+export async function generatePositionToken(
+  positionId: string
+): Promise<{ token?: string; error?: string }> {
+  await requireRecruiter()
+
+  // Generate a cryptographically secure random token
+  // 32 bytes = 64 hex characters — long enough to be unguessable
+  const token = randomBytes(32).toString("hex")
+
+  await prisma.position.update({
+    where: { id: positionId },
+    data: { apiToken: token },
+  })
+
+  return { token }
 }

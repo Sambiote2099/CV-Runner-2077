@@ -115,6 +115,7 @@ model Position {
   isPublic    Boolean  @default(true)
   maxProjects Int      @default(3)
   projectTags String[] @default([])
+  apiToken    String?  @unique
   version     Int      @default(1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
