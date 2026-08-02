@@ -13,14 +13,16 @@ export async function createSupportTicket(data: {
 }): Promise<{ success?: boolean; error?: string }> {
   const session = await auth()
 
+  if (!session?.user) {
+    return { error: "You must be logged in to submit a support ticket." }
+  }
+
   if (!data.summary.trim()) {
     return { error: "Summary is required." }
   }
 
-  // "Reported by" — current user with role, or Anonymous if not signed in
-  const reportedBy = session?.user
-    ? `${session.user.name ?? session.user.email} (${session.user.role})`
-    : "Anonymous (not signed in)"
+  // "Reported by" — current user with role
+  const reportedBy = `${session.user.name ?? session.user.email} (${session.user.role})`
 
   // Try to resolve a Position title from the page the ticket was raised on.
   // Handles /positions/[id] directly, and /cv/[id] by looking up the CV's position.
@@ -68,7 +70,7 @@ export async function createSupportTicket(data: {
     await uploadJsonToDropbox(`ticket-${Date.now()}.json`, ticket)
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error"
-    return { error: `Failed to submit ticket: ${message} (must be logged in)` }
+    return { error: `Failed to submit ticket: ${message}` }
   }
 
   return { success: true }
