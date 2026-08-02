@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Export wizard form -->
+  <record id="cv_export_wizard_form" model="ir.ui.view">
+    <field name="name">cv.export.wizard.form</field>
+    <field name="model">cv.export.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Create Position in CV Runner">
+        <sheet>
+
+          <!-- Step 1: Connection -->
+          <group string="Connection">
+            <field name="api_url"
+              placeholder="https://your-app.vercel.app"
+            />
+            <field name="admin_key"
+              password="True"
+              placeholder="Paste your ADMIN_API_KEY here"
+            />
+          </group>
+
+          <!-- Step 2: Position details -->
+          <group string="Position Details">
+            <field name="title" placeholder="e.g. Junior Data Engineer"/>
+            <field name="is_public" widget="boolean_toggle"/>
+            <field name="max_projects"/>
+            <field name="project_tags"
+              placeholder="python, sql, react"
+            />
+          </group>
+
+          <group string="Description">
+            <field name="description" nolabel="1"
+              placeholder="Describe this position…"
+            />
+          </group>
+
+          <!-- Step 3: Attributes — load then select -->
+          <group string="Attributes">
+            <p invisible="attributes_loaded">
+              Click "Load Attributes" to fetch available attributes
+              from CV Runner, then select which ones to include.
+            </p>
+          </group>
+
+          <field name="attributes_loaded" invisible="1"/>
+
+          <field name="attribute_ids"
+            invisible="not attributes_loaded"
+          >
+            <list editable="bottom">
+              <field name="selected"/>
+              <field name="attribute_name" readonly="1"/>
+              <field name="attribute_type" readonly="1"/>
+              <field name="attribute_id" column_invisible="1"/>
+            </list>
+          </field>
+
+          <!-- Result after export -->
+          <group string="Result"
+            invisible="not created_position_id"
+          >
+            <field name="created_position_id" readonly="1"/>
+            <field name="created_position_url" readonly="1"
+              widget="url"
+            />
+          </group>
+
+        </sheet>
+
+        <footer>
+          <!-- Step 1 button: load attributes -->
+          <button
+            name="action_load_attributes"
+            string="Load Attributes"
+            type="object"
+            class="btn-secondary"
+            invisible="attributes_loaded"
+          />
+
+          <!-- Step 2 button: export position -->
+          <button
+            name="action_export"
+            string="Create Position in CV Runner"
+            type="object"
+            class="btn-primary"
+            invisible="not attributes_loaded"
+          />
+
+          <button
+            string="Close"
+            class="btn-secondary"
+            special="cancel"
+          />
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Action to open the export wizard -->
+  <record id="cv_export_wizard_action" model="ir.actions.act_window">
+    <field name="name">Create Position in CV Runner</field>
+    <field name="res_model">cv.export.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- Menu item -->
+  <menuitem
+    id="cv_runner_menu_export"
+    name="Create Position in CV Runner"
+    parent="cv_runner_menu_root"
+    action="cv_export_wizard_action"
+    sequence="30"
+  />
+
+</odoo>

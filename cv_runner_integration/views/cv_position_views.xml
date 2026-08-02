@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- List view — shows all imported positions -->
+  <record id="cv_position_list_view" model="ir.ui.view">
+    <field name="name">cv.position.list</field>
+    <field name="model">cv.position</field>
+    <field name="arch" type="xml">
+      <list string="Positions">
+        <field name="name"/>
+        <field name="total_cvs"/>
+        <field name="is_public"/>
+        <field name="import_date"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Form view — detailed view of one position -->
+  <record id="cv_position_form_view" model="ir.ui.view">
+    <field name="name">cv.position.form</field>
+    <field name="model">cv.position</field>
+    <field name="arch" type="xml">
+      <form string="Position" create="false" edit="false">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name"/></h1>
+          </div>
+
+          <group>
+            <group string="Position Info">
+              <field name="is_public" widget="boolean_toggle"/>
+              <field name="total_cvs"/>
+              <field name="project_tags"/>
+              <field name="import_date"/>
+            </group>
+            <group string="Integration">
+              <field name="external_id"/>
+              <field name="api_token" password="True"/>
+            </group>
+          </group>
+
+          <group string="Description">
+            <field name="description" nolabel="1"/>
+          </group>
+
+          <!-- Attributes and their aggregated results -->
+          <notebook>
+            <page string="Attributes &amp; Results">
+              <field name="attribute_ids">
+                <list>
+                  <field name="name"/>
+                  <field name="attribute_type"/>
+                  <field name="total_responses"/>
+                  <field name="aggregation_summary"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Action — opens the position list -->
+  <record id="cv_position_action" model="ir.actions.act_window">
+    <field name="name">Positions</field>
+    <field name="res_model">cv.position</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <!-- Menu items -->
+  <menuitem
+    id="cv_runner_menu_root"
+    name="CV Runner"
+    sequence="100"
+  />
+  <menuitem
+    id="cv_runner_menu_positions"
+    name="Positions"
+    parent="cv_runner_menu_root"
+    action="cv_position_action"
+    sequence="10"
+  />
+
+</odoo>

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cv_position,cv.position,model_cv_position,,1,1,1,1
+access_cv_position_attribute,cv.position.attribute,model_cv_position_attribute,,1,1,1,1
+access_cv_import_wizard,cv.import.wizard,model_cv_import_wizard,,1,1,1,1
+access_cv_export_wizard,cv.export.wizard,model_cv_export_wizard,,1,1,1,1
+access_cv_attribute_selection,cv.attribute.selection,model_cv_attribute_selection,,1,1,1,1

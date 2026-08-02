@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- The import wizard form -->
+  <record id="cv_import_wizard_form" model="ir.ui.view">
+    <field name="name">cv.import.wizard.form</field>
+    <field name="model">cv.import.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Import from CV Runner">
+        <sheet>
+          <group>
+            <field name="api_url"
+              placeholder="https://your-app.vercel.app"
+              help="The URL of your deployed CV Runner application"
+            />
+            <field name="api_token"
+              placeholder="Paste the token from the position page"
+              help="Generate this token from the position's Overview tab in CV Runner"
+            />
+          </group>
+        </sheet>
+        <footer>
+          <button
+            name="action_import"
+            string="Import Position"
+            type="object"
+            class="btn-primary"
+          />
+          <button string="Cancel" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Action that opens the wizard -->
+  <record id="cv_import_wizard_action" model="ir.actions.act_window">
+    <field name="name">Import from CV Runner</field>
+    <field name="res_model">cv.import.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- Menu item for the import action -->
+  <menuitem
+    id="cv_runner_menu_import"
+    name="Import from CV Runner"
+    parent="cv_runner_menu_root"
+    action="cv_import_wizard_action"
+    sequence="20"
+  />
+
+</odoo>
