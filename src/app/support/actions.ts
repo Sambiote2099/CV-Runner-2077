@@ -68,7 +68,7 @@ export async function createSupportTicket(data: {
     await uploadJsonToDropbox(`ticket-${Date.now()}.json`, ticket)
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error"
-    return { error: `Failed to submit ticket: ${message}` }
+    return { error: `Failed to submit ticket: ${message} (must be logged in)` }
   }
 
   return { success: true }
