@@ -11,6 +11,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner"
 import ClickSpark from "@/components/ClickSpark";
+import SupportTicketButton from "@/components/support-ticket-button"
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -43,6 +44,7 @@ export default async function RootLayout({
             <main className="pt-24 sm:pt-16">{children}</main>
             <Footer/>
             </SmoothScroll>
+            <SupportTicketButton />
             </ClickSpark>
             <Toaster richColors position="top-right" />
           </ThemeProvider>
